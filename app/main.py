@@ -11,11 +11,13 @@ from app.services.identify.image_vectorizer import ImageVectorizer
 from app.services.identify.manager import identify_cap
 from app.services.identify.pinecone_container import PineconeContainer
 from app.shared.utils import img_to_numpy
+from app.services.firebase.router import firebase_router
 
 load_dotenv()
 app = FastAPI()
+
 pinecone_container: PineconeContainer = PineconeContainer()
-image_vectorizer = ImageVectorizer()
+image_vectorizer: ImageVectorizer = ImageVectorizer()
 
 origins = [
     "*",
@@ -30,6 +32,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(firebase_router)
 
 
 def post_detect_and_identify(file_contents: bytes) -> dict:

@@ -32,10 +32,9 @@ class TestManager:
 
             expected_result = self.expected_results[img]
             if expected_result in identify_result:
-                logger.info(f"{expected_result} correctly found in {identify_result}")
                 total_accuracy += 1
             else:
-                logger.error(f"{expected_result} not found in {identify_result}")
+                logger.error(f"{expected_result} NOT found in {identify_result}")
         logger.info(
             f"Currently the bottle cap has an accuracy of {total_accuracy / len(imgs)} "
             f"({total_accuracy}/{len(imgs)})"

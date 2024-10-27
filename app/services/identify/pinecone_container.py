@@ -2,12 +2,16 @@ import os
 
 from pinecone import Pinecone
 
+from app.config import Settings
+
 TOP_K = 9
+
+settings = Settings()
 
 
 class PineconeContainer:
     def __init__(self):
-        self.pc = Pinecone(api_key=os.environ["API_KEY"], environment=os.environ["ENV"])
+        self.pc = Pinecone(api_key=settings.pinecone_api_key, environment=settings.pinecone_env)
         self.index = self.pc.Index(name="bottle-caps")
 
     def query_database(self, vector):

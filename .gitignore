@@ -6,6 +6,9 @@ __pycache__/
 # Environment variables
 .env
 
+# Secrets
+creds/
+
 *.DS_Store
 .mypy_cache/
 
