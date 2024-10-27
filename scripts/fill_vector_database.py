@@ -21,7 +21,7 @@ def fill_vector_database() -> None:
     for img_path in folders:
         file_path: str = str(Path(root_dir) / img_path)
         img = read_img_from_path_with_mask(file_path)
-        vector = img_vectorizer.image_to_vector(img=img)
+        vector = img_vectorizer.numpy_to_vector(img=img)
         cap_info = {"id": img_path, "values": vector}
         pinecone_container.upsert_dict_pinecone(cap_info=cap_info)
 

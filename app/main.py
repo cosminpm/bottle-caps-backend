@@ -7,19 +7,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.services.detect.manager import detect_caps
-from app.services.firebase_container import FirebaseContainer
-from app.services.saver.router import saver_router
-from app.services.identify.image_vectorizer import ImageVectorizer
 from app.services.identify.manager import identify_cap
-from app.services.pinecone_container import PineconeContainer
+from app.services.saver.router import saver_router
 from app.shared.utils import img_to_numpy
 
 load_dotenv()
 app = FastAPI()
 
-firebase_container: FirebaseContainer = FirebaseContainer()
-pinecone_container: PineconeContainer = PineconeContainer()
-image_vectorizer: ImageVectorizer = ImageVectorizer()
 
 origins = [
     "*",
@@ -56,8 +50,6 @@ def post_detect_and_identify(file_contents: bytes) -> dict:
     caps_identified = [
         identify_cap(
             cap=np.array(cap[0]),
-            image_vectorizer=image_vectorizer,
-            pinecone_con=pinecone_container,
         )
         for cap in cropped_images
     ]
@@ -123,9 +115,7 @@ async def identify(file: UploadFile) -> list[dict]:
 
     """
     image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
-    return identify_cap(
-        cap=np.array(image), pinecone_con=pinecone_container, image_vectorizer=image_vectorizer
-    )
+    return identify_cap(cap=np.array(image))
 
 
 if __name__ == "__main__":

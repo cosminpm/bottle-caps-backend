@@ -12,7 +12,7 @@ class PineconeContainer:
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(PineconeContainer, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             cls._instance._initialize()
         return cls._instance
 
@@ -35,11 +35,7 @@ class PineconeContainer:
         return self.parse_result_query(result)
 
     def upsert_into_pinecone(self, vector_id: str, values: list[float], metadata: dict) -> None:
-        cap = {
-            "id": vector_id,
-            "values": values,
-            "metadata": metadata
-        }
+        cap = {"id": vector_id, "values": values, "metadata": metadata}
         return self.upsert_dict_pinecone(cap)
 
     def upsert_dict_pinecone(self, cap_info: dict) -> None:
