@@ -3,7 +3,7 @@ from pathlib import Path
 from numpy import ndarray
 
 from app.services.identify.image_vectorizer import ImageVectorizer
-from app.services.identify.pinecone_container import PineconeContainer
+from app.services.pinecone_container import PineconeContainer
 from app.shared.utils import apply_mask
 
 PROJECT_PATH = Path.cwd()

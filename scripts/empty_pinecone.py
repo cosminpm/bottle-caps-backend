@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-from app.services.identify.pinecone_container import PineconeContainer
+from app.services.pinecone_container import PineconeContainer
 
 
 def empty_pinecone() -> None:

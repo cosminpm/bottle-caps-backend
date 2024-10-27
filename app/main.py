@@ -7,15 +7,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.services.detect.manager import detect_caps
+from app.services.firebase_container import FirebaseContainer
+from app.services.saver.router import saver_router
 from app.services.identify.image_vectorizer import ImageVectorizer
 from app.services.identify.manager import identify_cap
-from app.services.identify.pinecone_container import PineconeContainer
+from app.services.pinecone_container import PineconeContainer
 from app.shared.utils import img_to_numpy
-from app.services.firebase.router import firebase_router
 
 load_dotenv()
 app = FastAPI()
 
+firebase_container: FirebaseContainer = FirebaseContainer()
 pinecone_container: PineconeContainer = PineconeContainer()
 image_vectorizer: ImageVectorizer = ImageVectorizer()
 
@@ -33,7 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(firebase_router)
+app.include_router(saver_router)
 
 
 def post_detect_and_identify(file_contents: bytes) -> dict:

@@ -4,7 +4,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from app.services.identify.image_vectorizer import ImageVectorizer
-from app.services.identify.pinecone_container import PineconeContainer
+from app.services.pinecone_container import PineconeContainer
 from app.shared.utils import read_img_from_path_with_mask
 
 PROJECT_PATH = Path.cwd()
@@ -23,7 +23,7 @@ def fill_vector_database() -> None:
         img = read_img_from_path_with_mask(file_path)
         vector = img_vectorizer.image_to_vector(img=img)
         cap_info = {"id": img_path, "values": vector}
-        pinecone_container.upsert_one_pinecone(cap_info=cap_info)
+        pinecone_container.upsert_dict_pinecone(cap_info=cap_info)
 
 
 if __name__ == "__main__":
