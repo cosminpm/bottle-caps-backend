@@ -5,6 +5,7 @@ import numpy as np
 from loguru import logger
 from numpy import ndarray
 
+from app.config import Settings
 from app.shared.save_img_decorator import save_img
 
 DEBUG_BLOB = 1
@@ -14,6 +15,7 @@ PREPO_convolution_size = 15
 percent_min_area_of_original = 0.01
 percent_max_area_of_original = 0.99
 
+settings = Settings()
 
 @save_img(output_path="./animations/pp_1.png")
 def reduce_colors_images(image: ndarray, n_colors: int) -> ndarray:
@@ -89,14 +91,13 @@ def get_avg_size_all_blobs(img: ndarray) -> int:
     keypoints = detector.detect(img)
     keypoints = _remove_overlapping_blobs(keypoints=keypoints)
 
-    _draw_img(img, keypoints)
     if len(keypoints) == 0:
         return 0
     return int(_get_avg_size_blobs(keypoints) / 2)
 
 
-def _draw_img(img: ndarray, keypoints, env_var_name: str = "SAVE_IMG"):
-    if os.getenv(env_var_name):
+def _save_img(img: ndarray, keypoints):
+    if settings.save_image:
         blobs_img = cv2.drawKeypoints(
             img.copy(),
             keypoints,

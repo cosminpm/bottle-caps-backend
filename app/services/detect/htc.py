@@ -63,9 +63,7 @@ def hough_transform_circle(original_img: np.ndarray, max_radius: int) -> list[tu
     )
     circles: uint16 = np.uint16(np.around(circles))
 
-    combined = combine_overlapping_circles(circles)
-    _draw_img(original_img, combined)
-    return combined
+    return combine_overlapping_circles(circles)
 
 
 def _draw_img(img: ndarray, circles, env_var_name: str = "SAVE_IMG"):

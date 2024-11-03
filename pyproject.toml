@@ -45,4 +45,5 @@ lint.ignore = [
     "FBT001",   # Boolean-typed positional argument in function definition
     "PLR0913",  # Too many arguments in function definition (7 > 5)
     "SLF001",   # Private member accessed: `_initialize`
+    "E402",     # Module level import not at top of file
 ]

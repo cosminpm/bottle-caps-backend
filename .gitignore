@@ -6,8 +6,10 @@ __pycache__/
 # Environment variables
 .env
 
+
 # Secrets
 creds/
+bottle-caps-firebase.json
 
 *.DS_Store
 .mypy_cache/

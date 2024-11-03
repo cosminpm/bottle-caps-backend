@@ -1,3 +1,5 @@
+from typing import Any
+
 import cv2
 import numpy as np
 import uvicorn
@@ -5,15 +7,20 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from requests import Request
 
+load_dotenv()
+
+from pyinstrument import Profiler
+
+from app.config import Settings
 from app.services.detect.manager import detect_caps
 from app.services.identify.manager import identify_cap
 from app.services.saver.router import saver_router
 from app.shared.utils import img_to_numpy
 
-load_dotenv()
 app = FastAPI()
-
+settings = Settings()
 
 origins = [
     "*",
@@ -30,6 +37,18 @@ app.add_middleware(
 )
 
 app.include_router(saver_router)
+
+# Profiling
+if settings.profiling:
+
+    @app.middleware("http")
+    async def profile_request(request: Request, call_next: Any) -> Any:
+        profiler = Profiler(interval=0.01, async_mode="enabled")
+        profiler.start()
+        response = await call_next(request)
+        profiler.stop()
+        profiler.open_in_browser()
+        return response
 
 
 def post_detect_and_identify(file_contents: bytes) -> dict:
@@ -81,6 +100,7 @@ async def detect_and_identify(file: UploadFile):
         }
     )
 
+
 @app.post("/detect")
 async def detect(file: UploadFile) -> list:
     """Detect bottle caps in an image.
@@ -118,4 +138,4 @@ async def identify(file: UploadFile) -> list[dict]:
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="localhost", port=8080)

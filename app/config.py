@@ -10,3 +10,6 @@ class Settings(BaseSettings):
 
     pinecone_api_key: str
     pinecone_env: str
+
+    profiling: bool = False
+    save_image: bool = False

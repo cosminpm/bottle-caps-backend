@@ -10,7 +10,9 @@ saver_router: APIRouter = APIRouter()
 
 
 @saver_router.post("/saver/", tags=["Saver"])
-async def save_image(file: UploadFile, name: str, user_id: str, vector: list[float] | None = None) -> str:
+async def save_image(
+    file: UploadFile, name: str, user_id: str, vector: list[float] | None = None
+) -> str:
     """Save an image into saver.
 
     Args:
