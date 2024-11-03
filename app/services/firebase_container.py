@@ -24,7 +24,7 @@ class FirebaseContainer:
         self.bucket = storage.bucket()
 
     def add_image_to_container(self, file: UploadFile, name: str, user_id: str) -> str:
-        blob_path = f"{user_id}/{name}"
+        blob_path = f"user/collection/{user_id}/{name}"
         blob = self.bucket.blob(blob_path)
         blob.upload_from_file(file.file, content_type=file.content_type)
 
