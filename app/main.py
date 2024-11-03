@@ -81,7 +81,6 @@ async def detect_and_identify(file: UploadFile):
         }
     )
 
-
 @app.post("/detect")
 async def detect(file: UploadFile) -> list:
     """Detect bottle caps in an image.
