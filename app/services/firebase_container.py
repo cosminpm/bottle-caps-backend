@@ -1,5 +1,6 @@
 import firebase_admin
-from fastapi import UploadFile
+import starlette.status
+from fastapi import UploadFile, HTTPException
 from firebase_admin import credentials, storage
 
 from app.config import Settings
@@ -26,7 +27,10 @@ class FirebaseContainer:
     def add_image_to_container(self, file: UploadFile, name: str, user_id: str) -> str:
         blob_path = f"users/{user_id}/collection/{name}"
         blob = self.bucket.blob(blob_path)
-        blob.upload_from_file(file.file, content_type=file.content_type)
 
+        if blob.exists():
+            raise HTTPException(status_code=starlette.status.HTTP_409_CONFLICT, detail="Image already exists.")
+
+        blob.upload_from_file(file.file, content_type=file.content_type)
         blob.make_public()
         return blob.public_url
