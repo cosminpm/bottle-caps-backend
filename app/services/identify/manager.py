@@ -9,7 +9,7 @@ from app.shared.utils import apply_mask
 PROJECT_PATH = Path.cwd()
 
 
-def identify_cap(cap: ndarray) -> list[dict]:
+def identify_cap(cap: ndarray, user_id: str) -> list[dict]:
     """Identify a cap from the Pinecone database.
 
     Args:
@@ -28,5 +28,5 @@ def identify_cap(cap: ndarray) -> list[dict]:
     image_vectorizer: ImageVectorizer = ImageVectorizer()
     img = apply_mask(cap)
     vector = image_vectorizer.numpy_to_vector(img=img)
-    result = pinecone_container.query_database(vector=vector)
+    result = pinecone_container.query_with_metadata(vector=vector, metadata={"user_id": user_id})
     return [cap.to_dict() for cap in result]

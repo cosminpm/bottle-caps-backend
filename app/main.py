@@ -121,7 +121,7 @@ async def detect(file: UploadFile) -> list:
 
 
 @app.post("/identify")
-async def identify(file: UploadFile) -> list[dict]:
+async def identify(file: UploadFile, user_id: str) -> list[dict]:
     """Identify the bottle cap of an image.
 
     Args:
@@ -134,7 +134,7 @@ async def identify(file: UploadFile) -> list[dict]:
 
     """
     image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
-    return identify_cap(cap=np.array(image))
+    return identify_cap(cap=np.array(image), user_id=user_id)
 
 
 if __name__ == "__main__":
