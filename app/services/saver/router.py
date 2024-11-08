@@ -9,7 +9,7 @@ from app.services.pinecone_container import PineconeContainer
 saver_router: APIRouter = APIRouter()
 
 
-@saver_router.post("/saver/", tags=["Saver"])
+@saver_router.post("/saver", tags=["Saver"])
 async def save_image(
     file: UploadFile, name: str, user_id: str, vector: list[float] | None = None
 ) -> str:
@@ -28,7 +28,7 @@ async def save_image(
 
     """
     if not vector:
-        vector = ImageVectorizer().image_to_vector(file)
+        vector = await ImageVectorizer().image_to_vector(file)
     pinecone_container: PineconeContainer = PineconeContainer()
     firebase_container: FirebaseContainer = FirebaseContainer()
 
