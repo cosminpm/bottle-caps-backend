@@ -2,12 +2,16 @@ from typing import Any
 
 import cv2
 import numpy as np
+import requests
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from requests import Request
+from fastapi_utilities import repeat_every
+from loguru import logger
+from starlette import status
 
 load_dotenv()
 
@@ -40,7 +44,6 @@ app.include_router(saver_router)
 
 # Profiling
 if settings.profiling:
-
     @app.middleware("http")
     async def profile_request(request: Request, call_next: Any) -> Any:
         """Profile the request."""
@@ -50,6 +53,21 @@ if settings.profiling:
         profiler.stop()
         profiler.open_in_browser()
         return response
+
+
+@repeat_every(seconds=14 * 60)
+def call_healthcheck():
+    endpoint_url = "https://bottle-caps-backend.onrender.com/health"
+    response = requests.get(endpoint_url)
+    if response.status_code == 200:
+        logger.info("Successfully hit the endpoint")
+    else:
+        logger.error(f"Failed to hit endpoint. Status code: {response.status_code}")
+
+
+@app.get("/health")
+def health_check():
+    return status.HTTP_200_OK
 
 
 def post_detect_and_identify(file_contents: bytes, user_id: str) -> dict:
