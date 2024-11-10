@@ -1,5 +1,3 @@
-import os
-
 import cv2
 import numpy as np
 from loguru import logger
@@ -16,6 +14,7 @@ percent_min_area_of_original = 0.01
 percent_max_area_of_original = 0.99
 
 settings = Settings()
+
 
 @save_img(output_path="./animations/pp_1.png")
 def reduce_colors_images(image: ndarray, n_colors: int) -> ndarray:

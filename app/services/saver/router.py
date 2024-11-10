@@ -31,8 +31,9 @@ async def save_image(
         vector = await ImageVectorizer().image_to_vector(file)
     pinecone_container: PineconeContainer = PineconeContainer()
     firebase_container: FirebaseContainer = FirebaseContainer()
-
+    file_name: str = f"{name}.jpg"
+    upload_url: str = firebase_container.add_image_to_container(file, file_name, user_id)
     pinecone_container.upsert_into_pinecone(
-        vector_id=str(uuid.uuid4()), values=vector, metadata={"user_id": user_id, "name": name}
+        vector_id=str(uuid.uuid4()), values=vector, metadata={"user_id": user_id, "name": file_name}
     )
-    return firebase_container.add_image_to_container(file, name, user_id)
+    return upload_url

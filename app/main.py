@@ -43,6 +43,7 @@ if settings.profiling:
 
     @app.middleware("http")
     async def profile_request(request: Request, call_next: Any) -> Any:
+        """Profile the request."""
         profiler = Profiler(interval=0.01, async_mode="enabled")
         profiler.start()
         response = await call_next(request)
@@ -51,12 +52,13 @@ if settings.profiling:
         return response
 
 
-def post_detect_and_identify(file_contents: bytes) -> dict:
+def post_detect_and_identify(file_contents: bytes, user_id: str) -> dict:
     """Detect and indentify a bottle cap.
 
     Args:
     ----
         file_contents: The raw content.
+        user_id: The user_id of the person.
 
     Returns:
     -------
@@ -67,10 +69,7 @@ def post_detect_and_identify(file_contents: bytes) -> dict:
     image = img_to_numpy(image)
     cropped_images = detect_caps(image)
     caps_identified = [
-        identify_cap(
-            cap=np.array(cap[0]),
-        )
-        for cap in cropped_images
+        identify_cap(cap=np.array(cap[0]), user_id=user_id) for cap in cropped_images
     ]
 
     positions = [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
@@ -79,19 +78,20 @@ def post_detect_and_identify(file_contents: bytes) -> dict:
 
 
 @app.post("/detect_and_identify")
-async def detect_and_identify(file: UploadFile):
+async def detect_and_identify(file: UploadFile, user_id: str):
     """Detect and identify an image containing multiple bottle caps.
 
     Args:
     ----
         file:  The file we are going to process.
+        user_id: The user_id of the person.
 
     Returns:
     -------
         A json response containing the main information.
 
     """
-    result = post_detect_and_identify(await file.read())
+    result = post_detect_and_identify(await file.read(), user_id=user_id)
     return JSONResponse(
         content={
             "filename": file.filename,
@@ -127,6 +127,7 @@ async def identify(file: UploadFile, user_id: str) -> list[dict]:
     Args:
     ----
         file: The file we are going to identify in an image.
+        user_id: The user_id of the person.
 
     Returns:
     -------

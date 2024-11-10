@@ -15,9 +15,7 @@ def identify_cap(cap: ndarray, user_id: str) -> list[dict]:
     Args:
     ----
         cap: The cap.
-        pinecone_con: The Pinecone connection.
-        image_vectorizer: The class that transforms imgs to vectors
-        model: The Keras model.
+        user_id: The user_id of the person
 
     Returns:
     -------
