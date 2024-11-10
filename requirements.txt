@@ -18,3 +18,4 @@ torch~=2.5.0
 torchvision~=0.20.0
 pydantic-settings==2.6.1
 pyinstrument==5.0.0
+fastapi-utilities==0.3.0
