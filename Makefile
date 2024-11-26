@@ -21,6 +21,10 @@ install:
 uninstall:
 	@pip freeze | xargs pip uninstall -y
 
+# Powershell:
+# pip freeze | ForEach-Object { pip uninstall -y $_ }
+
+
 # Format code according to predefined style rules
 format:
 	@ruff format .

@@ -5,15 +5,15 @@ import cv2
 import numpy as np
 import requests
 import uvicorn
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from requests import Request
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from loguru import logger
-from starlette import status
 from pyinstrument import Profiler
+from requests import Request
+from starlette import status
 
 load_dotenv()
 
@@ -25,9 +25,10 @@ from app.shared.utils import img_to_numpy
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):  # noqa: ARG001
+    """Ping the server so it does not shut down."""
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(func=call_healthcheck, trigger='interval', seconds=14 * 60)
+    scheduler.add_job(func=call_healthcheck, trigger="interval", seconds=14 * 60)
     scheduler.start()
     yield
 
@@ -52,9 +53,10 @@ app.add_middleware(
 app.include_router(saver_router)
 
 # Profiling
-if settings.profiling:
+if settings.profiling_time:
+
     @app.middleware("http")
-    async def profile_request(request: Request, call_next: Any) -> Any:
+    async def profile_time_request(request: Request, call_next: Any) -> Any:
         """Profile the request."""
         profiler = Profiler(interval=0.01, async_mode="enabled")
         profiler.start()
@@ -65,9 +67,10 @@ if settings.profiling:
 
 
 def call_healthcheck():
+    """Call this server to ensure it's responding."""
     endpoint_url = f"{settings.prefix_url}{settings.host}:{settings.port}/health"
-    response = requests.get(endpoint_url)
-    if response.status_code == 200:
+    response = requests.get(endpoint_url, timeout=60)
+    if response.status_code == status.HTTP_200_OK:
         logger.info("Successfully hit the endpoint")
     else:
         logger.error(f"Failed to hit endpoint. Status code: {response.status_code}")
@@ -75,6 +78,7 @@ def call_healthcheck():
 
 @app.get("/health")
 def health_check():
+    """Healthcheck."""
     return status.HTTP_200_OK
 
 

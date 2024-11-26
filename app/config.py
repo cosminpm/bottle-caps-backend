@@ -11,8 +11,10 @@ class Settings(BaseSettings):
     pinecone_api_key: str
     pinecone_env: str
 
-    profiling: bool = False
+    profiling_time: bool = False
+
     save_image: bool = False
-    host: str = "0.0.0.0"
+    host: str = "0.0.0.0"  # noqa: S104
     port: int = 10000
     prefix_url: str = "https://"
+    torch_home: str = "./model"

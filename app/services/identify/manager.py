@@ -27,5 +27,4 @@ def identify_cap(cap: ndarray, user_id: str) -> list[dict]:
     img = apply_mask(cap)
     vector = image_vectorizer.numpy_to_vector(img=img)
     result = pinecone_container.query_with_metadata(vector=vector, metadata={"user_id": user_id})
-    res = [cap.to_dict() for cap in result]
     return [{"name": cap["metadata"]["name"], "score": cap["score"]} for cap in result]
