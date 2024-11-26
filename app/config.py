@@ -16,5 +16,5 @@ class Settings(BaseSettings):
     save_image: bool = False
     host: str = "0.0.0.0"  # noqa: S104
     port: int = 8080
-    prefix_url: str = "https://"
+    prefix_url: str = "http://"
     torch_home: str = "./model"
