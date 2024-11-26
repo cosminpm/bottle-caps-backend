@@ -54,7 +54,7 @@ if settings.profiling:
         profiler.open_in_browser()
         return response
 
-
+@app.on_event("startup")
 @repeat_every(seconds=14 * 60)
 def call_healthcheck():
     endpoint_url = "https://bottle-caps-backend.onrender.com/health"
