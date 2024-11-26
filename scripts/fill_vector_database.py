@@ -1,5 +1,4 @@
 import os
-import uuid
 from pathlib import Path
 
 from dotenv import load_dotenv
