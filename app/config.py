@@ -13,3 +13,6 @@ class Settings(BaseSettings):
 
     profiling: bool = False
     save_image: bool = False
+    host: str = "0.0.0.0"
+    port: int = 10000
+    prefix_url: str = "https://"

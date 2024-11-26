@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from typing import Any
 
 import cv2
@@ -9,13 +10,12 @@ from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from requests import Request
-from fastapi_utilities import repeat_every
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from loguru import logger
 from starlette import status
+from pyinstrument import Profiler
 
 load_dotenv()
-
-from pyinstrument import Profiler
 
 from app.config import Settings
 from app.services.detect.manager import detect_caps
@@ -23,7 +23,16 @@ from app.services.identify.manager import identify_cap
 from app.services.saver.router import saver_router
 from app.shared.utils import img_to_numpy
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(func=call_healthcheck, trigger='interval', seconds=1)
+    scheduler.start()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 settings = Settings()
 
 origins = [
@@ -54,10 +63,9 @@ if settings.profiling:
         profiler.open_in_browser()
         return response
 
-@app.on_event("startup")
-@repeat_every(seconds=14 * 60)
+
 def call_healthcheck():
-    endpoint_url = "https://bottle-caps-backend.onrender.com/health"
+    endpoint_url = f"{settings.prefix_url}{settings.host}:{settings.port}/health"
     response = requests.get(endpoint_url)
     if response.status_code == 200:
         logger.info("Successfully hit the endpoint")
@@ -157,4 +165,4 @@ async def identify(file: UploadFile, user_id: str) -> list[dict]:
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8080)
+    uvicorn.run(app, host=settings.host, port=settings.port)
