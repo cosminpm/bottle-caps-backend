@@ -27,7 +27,7 @@ from app.shared.utils import img_to_numpy
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(func=call_healthcheck, trigger='interval', seconds=1)
+    scheduler.add_job(func=call_healthcheck, trigger='interval', seconds=14 * 60)
     scheduler.start()
     yield
 
