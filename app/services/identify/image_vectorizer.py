@@ -4,7 +4,8 @@ import cv2
 import numpy as np
 import torch
 from fastapi import UploadFile
-from torchvision import models, transforms
+from torchvision import transforms
+from torchvision.models import mobilenet_v3_small
 
 from app.shared.utils import apply_mask
 
@@ -19,7 +20,7 @@ class ImageVectorizer:
         return cls._instance
 
     def _initialize(self):
-        self.model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
+        self.model = mobilenet_v3_small(weights="IMAGENET1K_V1")
         self.model = torch.nn.Sequential(*list(self.model.children())[:-1])
         self.model.eval()
 

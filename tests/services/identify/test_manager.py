@@ -27,9 +27,8 @@ class TestManager:
         for img in imgs:
             img_path = Path(str(folder)) / img
             file: UploadFile = await upload_file(img_path)
-            identify_result: list[dict] = await identify(file=file)
-            identify_result: list[str] = [cap["id"] for cap in identify_result]
-
+            identify_result: list[dict] = await identify(file=file, user_id="test_user")
+            identify_result: list[str] = [cap["name"] for cap in identify_result]
             expected_result = self.expected_results[img]
             if expected_result in identify_result:
                 total_accuracy += 1

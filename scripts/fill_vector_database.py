@@ -1,14 +1,16 @@
 import os
+import uuid
 from pathlib import Path
 
 from dotenv import load_dotenv
+
+load_dotenv()
 
 from app.services.identify.image_vectorizer import ImageVectorizer
 from app.services.pinecone_container import PineconeContainer
 from app.shared.utils import read_img_from_path_with_mask
 
 PROJECT_PATH = Path.cwd()
-load_dotenv()
 
 
 def fill_vector_database() -> None:
@@ -22,8 +24,9 @@ def fill_vector_database() -> None:
         file_path: str = str(Path(root_dir) / img_path)
         img = read_img_from_path_with_mask(file_path)
         vector = img_vectorizer.numpy_to_vector(img=img)
-        cap_info = {"id": img_path, "values": vector}
-        pinecone_container.upsert_dict_pinecone(cap_info=cap_info)
+        pinecone_container.upsert_into_pinecone(
+            vector_id=img_path, values=vector, metadata={"user_id": "test_user", "name": img_path}
+        )
 
 
 if __name__ == "__main__":

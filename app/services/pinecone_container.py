@@ -21,7 +21,7 @@ class PineconeContainer:
         self.index = self.pc.Index(name="bottle-caps")
 
     def query_database(self, vector):
-        result = self.index.query(vector=[vector], top_k=TOP_K, namespace="bottle_caps")
+        result = self.index.query(vector=[vector], top_k=TOP_K, namespace="bottle-caps")
         return self.parse_result_query(result)
 
     def query_with_metadata(self, vector: list[float], metadata: dict):
@@ -30,7 +30,7 @@ class PineconeContainer:
             filter=metadata,
             top_k=TOP_K,
             include_metadata=True,
-            namespace="bottle_caps",
+            namespace="bottle-caps",
         )
         return self.parse_result_query(result)
 
@@ -46,14 +46,14 @@ class PineconeContainer:
             cap_info (dict): The dictionary can contain the following keys: id, values, metadata.
 
         """
-        self.index.upsert(vectors=[cap_info], namespace="bottle_caps")
+        self.index.upsert(vectors=[cap_info], namespace="bottle-caps")
 
     def upsert_multiple_pinecone(self, vectors):
-        self.index.upsert(vectors=vectors, namespace="bottle_caps")
+        self.index.upsert(vectors=vectors, namespace="bottle-caps")
 
     @staticmethod
     def parse_result_query(result_query):
         return result_query["matches"]
 
     def empty_index(self) -> None:
-        self.index.delete(delete_all=True, namespace="bottle_caps")
+        self.index.delete(delete_all=True, namespace="bottle-caps")
