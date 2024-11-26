@@ -68,7 +68,7 @@ if settings.profiling_time:
 
 def call_healthcheck():
     """Call this server to ensure it's responding."""
-    endpoint_url = f"{settings.prefix_url}{settings.host}:{settings.port}/health"
+    endpoint_url = "https://bottle-caps-backend.onrender.com/health"
     response = requests.get(endpoint_url, timeout=60)
     if response.status_code == status.HTTP_200_OK:
         logger.info("Successfully hit the endpoint")
