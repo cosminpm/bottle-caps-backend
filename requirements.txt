@@ -1,5 +1,5 @@
 pydantic==2.8.2
-opencv-python==4.10.0.84
+opencv-python-headless==4.10.0.84
 firebase-admin==6.5.0
 pinecone==5.0.1
 fastapi==0.112.1
