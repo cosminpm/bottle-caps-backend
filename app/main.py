@@ -166,7 +166,3 @@ async def identify(file: UploadFile, user_id: str) -> list[dict]:
     """
     image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
     return identify_cap(cap=np.array(image), user_id=user_id)
-
-
-if __name__ == "__main__":
-    uvicorn.run(app, host=settings.host, port=settings.port)
