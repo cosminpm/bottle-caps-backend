@@ -23,17 +23,7 @@ from app.services.identify.manager import identify_cap
 from app.services.saver.router import saver_router
 from app.shared.utils import img_to_numpy
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):  # noqa: ARG001
-    """Ping the server so it does not shut down."""
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(func=call_healthcheck, trigger="interval", seconds=14 * 60)
-    scheduler.start()
-    yield
-
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 settings = Settings()
 
 origins = [
@@ -54,7 +44,6 @@ app.include_router(saver_router)
 
 # Profiling
 if settings.profiling_time:
-
     @app.middleware("http")
     async def profile_time_request(request: Request, call_next: Any) -> Any:
         """Profile the request."""
@@ -64,16 +53,6 @@ if settings.profiling_time:
         profiler.stop()
         profiler.open_in_browser()
         return response
-
-
-def call_healthcheck():
-    """Call this server to ensure it's responding."""
-    endpoint_url = "https://bottle-caps-backend.onrender.com/health"
-    response = requests.get(endpoint_url, timeout=60)
-    if response.status_code == status.HTTP_200_OK:
-        logger.info("Successfully hit the endpoint")
-    else:
-        logger.error(f"Failed to hit endpoint. Status code: {response.status_code}")
 
 
 @app.get("/health")
