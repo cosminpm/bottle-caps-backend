@@ -31,5 +31,14 @@ format:
 	@ruff check . --fix
 	@mypy --config-file "pyproject.toml"
 
+# Build the docker image
+docker-build:
+	@docker build -t bottle_caps_backend .
 
+# Run the docker image
+docker-run:
+	@docker run -p 8080:8080 bottle_caps_backend
 
+# Update the env files
+env-update:
+	scp .env root@<IP_ADDRESS>:/root/app/bottle-caps-backend
