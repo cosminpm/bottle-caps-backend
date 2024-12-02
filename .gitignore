@@ -22,7 +22,12 @@ bottle-caps-firebase.json
 *.log
 *.pot
 
+# Visual tests
 visual/result/*
+visual/animations/*
+
+# Test DB
+database/*
 
 # links
 *.lnk
