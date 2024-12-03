@@ -1,16 +1,12 @@
-from contextlib import asynccontextmanager
 from typing import Any
 
 import cv2
 import numpy as np
-import requests
-import uvicorn
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile
+from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from loguru import logger
+from fastapi.security import OAuth2PasswordBearer
 from pyinstrument import Profiler
 from requests import Request
 from starlette import status
@@ -25,6 +21,7 @@ from app.shared.utils import img_to_numpy
 
 app = FastAPI()
 settings = Settings()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 origins = [
     "*",
@@ -44,6 +41,7 @@ app.include_router(saver_router)
 
 # Profiling
 if settings.profiling_time:
+
     @app.middleware("http")
     async def profile_time_request(request: Request, call_next: Any) -> Any:
         """Profile the request."""
@@ -55,7 +53,13 @@ if settings.profiling_time:
         return response
 
 
-@app.get("/health")
+def verify_token(auth_key: str = Header(...)):
+    """Add token authentication."""
+    if auth_key != settings.auth_key:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+
+
+@app.get("/health", dependencies=[Depends(verify_token)])
 def health_check():
     """Healthcheck."""
     return status.HTTP_200_OK
@@ -86,7 +90,7 @@ def post_detect_and_identify(file_contents: bytes, user_id: str) -> dict:
     return {"positions": positions, "caps_identified": caps_identified}
 
 
-@app.post("/detect_and_identify")
+@app.post("/detect_and_identify", dependencies=[Depends(verify_token)])
 async def detect_and_identify(file: UploadFile, user_id: str):
     """Detect and identify an image containing multiple bottle caps.
 
@@ -110,7 +114,7 @@ async def detect_and_identify(file: UploadFile, user_id: str):
     )
 
 
-@app.post("/detect")
+@app.post("/detect", dependencies=[Depends(verify_token)])
 async def detect(file: UploadFile) -> list:
     """Detect bottle caps in an image.
 
@@ -129,7 +133,7 @@ async def detect(file: UploadFile) -> list:
     return [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
 
 
-@app.post("/identify")
+@app.post("/identify", dependencies=[Depends(verify_token)])
 async def identify(file: UploadFile, user_id: str) -> list[dict]:
     """Identify the bottle cap of an image.
 

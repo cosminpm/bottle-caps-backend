@@ -18,3 +18,5 @@ class Settings(BaseSettings):
     port: int = 8080
     prefix_url: str = "http://"
     torch_home: str = "./model"
+
+    auth_key: str = "dumb_key"
