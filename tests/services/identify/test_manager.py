@@ -2,11 +2,13 @@ import json
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock
 
 import pytest
 from loguru import logger
+from starlette.requests import Request
 
-from app.main import identify
+from app.services.identify.router import identify
 from app.shared.utils import upload_file
 
 if TYPE_CHECKING:
@@ -24,10 +26,12 @@ class TestManager:
         imgs: list[str] = os.listdir("tests/services/identify/images")
         total_accuracy = 0
 
+        fake_request = MagicMock(spec=Request)
+
         for img in imgs:
             img_path = Path(str(folder)) / img
             file: UploadFile = await upload_file(img_path)
-            identify_result: list[dict] = await identify(file=file, user_id="test_user")
+            identify_result: list[dict] = await identify(file=file, user_id="test_user", request=fake_request)
             identify_result: list[str] = [cap["name"] for cap in identify_result]
             expected_result = self.expected_results[img]
             if expected_result in identify_result:

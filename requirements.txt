@@ -16,3 +16,4 @@ pydantic-settings==2.6.1
 pyinstrument==5.0.0
 APScheduler==3.10.4
 requests==2.31.0
+slowapi==0.1.9

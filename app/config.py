@@ -3,6 +3,8 @@ from pydantic_settings import BaseSettings
 
 load_dotenv()
 
+LIMIT_PERIOD: str = "15/minute"
+
 
 class Settings(BaseSettings):
     firebase_config_file: str
@@ -19,4 +21,4 @@ class Settings(BaseSettings):
     prefix_url: str = "http://"
     torch_home: str = "./model"
 
-    auth_key: str = "dumb_key"
+    api_key: str = "dumb_key"

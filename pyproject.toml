@@ -47,3 +47,6 @@ lint.ignore = [
     "SLF001",   # Private member accessed: `_initialize`
     "E402",     # Module level import not at top of file
 ]
+[tool.ruff.lint.per-file-ignores]
+"*router.py" = ["ARG001"]
+"*main.py" = ["ARG001"]

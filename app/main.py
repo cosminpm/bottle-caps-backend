@@ -1,27 +1,26 @@
 from typing import Any
 
-import cv2
-import numpy as np
-from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordBearer
 from pyinstrument import Profiler
-from requests import Request
 from starlette import status
+from starlette.requests import Request
 
-load_dotenv()
-
-from app.config import Settings
-from app.services.detect.manager import detect_caps
-from app.services.identify.manager import identify_cap
+from app.config import LIMIT_PERIOD, Settings
+from app.services.auth import validate_api_key
+from app.services.detect.router import detect_router
+from app.services.identify.router import identify_router
+from app.services.limiter import request_limiter
 from app.services.saver.router import saver_router
-from app.shared.utils import img_to_numpy
 
 app = FastAPI()
+
+# Add routers
+app.include_router(detect_router)
+app.include_router(identify_router)
+app.include_router(saver_router)
+
 settings = Settings()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 origins = [
     "*",
@@ -37,8 +36,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(saver_router)
-
 # Profiling
 if settings.profiling_time:
 
@@ -53,99 +50,8 @@ if settings.profiling_time:
         return response
 
 
-def verify_token(auth_key: str = Header(...)):
-    """Add token authentication."""
-    if auth_key != settings.auth_key:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
-
-
-@app.get("/health", dependencies=[Depends(verify_token)])
-def health_check():
+@app.get("/health", dependencies=[Depends(validate_api_key)])
+@request_limiter.limit(LIMIT_PERIOD)
+def health_check(request: Request):
     """Healthcheck."""
     return status.HTTP_200_OK
-
-
-def post_detect_and_identify(file_contents: bytes, user_id: str) -> dict:
-    """Detect and indentify a bottle cap.
-
-    Args:
-    ----
-        file_contents: The raw content.
-        user_id: The user_id of the person.
-
-    Returns:
-    -------
-        A dictionary containing all the necessary information.
-
-    """
-    image = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
-    image = img_to_numpy(image)
-    cropped_images = detect_caps(image)
-    caps_identified = [
-        identify_cap(cap=np.array(cap[0]), user_id=user_id) for cap in cropped_images
-    ]
-
-    positions = [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
-
-    return {"positions": positions, "caps_identified": caps_identified}
-
-
-@app.post("/detect_and_identify", dependencies=[Depends(verify_token)])
-async def detect_and_identify(file: UploadFile, user_id: str):
-    """Detect and identify an image containing multiple bottle caps.
-
-    Args:
-    ----
-        file:  The file we are going to process.
-        user_id: The user_id of the person.
-
-    Returns:
-    -------
-        A json response containing the main information.
-
-    """
-    result = post_detect_and_identify(await file.read(), user_id=user_id)
-    return JSONResponse(
-        content={
-            "filename": file.filename,
-            "positions": result["positions"],
-            "caps": result["caps_identified"],
-        }
-    )
-
-
-@app.post("/detect", dependencies=[Depends(verify_token)])
-async def detect(file: UploadFile) -> list:
-    """Detect bottle caps in an image.
-
-    Args:
-    ----
-        file: The file we are going to detect the images.
-
-    Returns:
-    -------
-        The list of positions were the caps where detected.
-
-    """
-    image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
-    image = img_to_numpy(image)
-    cropped_images = detect_caps(image)
-    return [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
-
-
-@app.post("/identify", dependencies=[Depends(verify_token)])
-async def identify(file: UploadFile, user_id: str) -> list[dict]:
-    """Identify the bottle cap of an image.
-
-    Args:
-    ----
-        file: The file we are going to identify in an image.
-        user_id: The user_id of the person.
-
-    Returns:
-    -------
-        The result of the identification of the bottle cap in a dictionary.
-
-    """
-    image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
-    return identify_cap(cap=np.array(image), user_id=user_id)
