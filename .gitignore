@@ -31,3 +31,6 @@ database/*
 
 # links
 *.lnk
+
+# certs
+*.pem

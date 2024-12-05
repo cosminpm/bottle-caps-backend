@@ -2,8 +2,7 @@
 .DEFAULT_GOAL := run
 
 # Define the FastAPI app module and command
-APP_MODULE := app.main:app
-UVICORN_COMMAND := uvicorn $(APP_MODULE) --use-colors
+UVICORN_COMMAND := uvicorn app.main:app --use-colors
 
 # Run the FastAPI app using uvicorn
 run:
@@ -37,7 +36,12 @@ docker-build:
 
 # Run the docker image
 docker-run:
-	@docker run -p 8080:8080 bottle_caps_backend
+	@docker run -d -p 8080:8080 bottle_caps_backend
+
+# Remove all docker containers
+docker-clean:
+	@docker system prune -a --volumes
+
 
 # Update the env files
 env-update:
