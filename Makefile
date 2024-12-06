@@ -1,6 +1,3 @@
-# Define the default target
-.DEFAULT_GOAL := run
-
 # Define the FastAPI app module and command
 UVICORN_COMMAND := uvicorn app.main:app --use-colors
 

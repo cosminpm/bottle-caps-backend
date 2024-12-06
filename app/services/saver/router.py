@@ -1,5 +1,6 @@
 import uuid
 
+import numpy as np
 from fastapi import APIRouter, Depends, UploadFile
 from starlette.requests import Request
 
@@ -9,6 +10,7 @@ from app.services.firebase_container import FirebaseContainer
 from app.services.identify.image_vectorizer import ImageVectorizer
 from app.services.limiter import request_limiter
 from app.services.pinecone_container import PineconeContainer
+from app.shared.utils import resize_image_width
 
 saver_router: APIRouter = APIRouter(dependencies=[Depends(validate_api_key)])
 
@@ -16,11 +18,11 @@ saver_router: APIRouter = APIRouter(dependencies=[Depends(validate_api_key)])
 @saver_router.post("/saver", tags=["Saver"])
 @request_limiter.limit(LIMIT_PERIOD)
 async def save_image(
-    file: UploadFile,
-    name: str,
-    user_id: str,
-    request: Request,
-    vector: list[float] | None = None,
+        file: UploadFile,
+        name: str,
+        user_id: str,
+        request: Request,
+        vector: list[float] | None = None,
 ) -> str:
     """Save an image into saver.
 
@@ -42,7 +44,9 @@ async def save_image(
     pinecone_container: PineconeContainer = PineconeContainer()
     firebase_container: FirebaseContainer = FirebaseContainer()
     file_name: str = f"{name}.jpg"
-    upload_url: str = firebase_container.add_image_to_container(file, file_name, user_id)
+
+    image: np.ndarray = resize_image_width(file)
+    upload_url: str = firebase_container.add_image_to_container(image, file_name, user_id)
     pinecone_container.upsert_into_pinecone(
         vector_id=str(uuid.uuid4()), values=vector, metadata={"user_id": user_id, "name": file_name}
     )

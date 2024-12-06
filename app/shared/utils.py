@@ -5,6 +5,7 @@ from pathlib import Path
 import aiofiles
 import cv2
 import numpy as np
+import starlette.datastructures
 from fastapi import UploadFile
 
 SIFT = cv2.SIFT_create()
@@ -151,3 +152,23 @@ async def upload_file(path: Path) -> UploadFile:
     async with aiofiles.open(path, mode="rb") as file:
         file_contents = await file.read()
         return UploadFile(filename=str(path), file=BytesIO(file_contents))
+
+
+def resize_image_width(image: np.ndarray | UploadFile) -> np.ndarray:
+    """Resize the image so the width is less than 1280. Can accept both np.ndarray and uploaded image files."""
+    if isinstance(image, starlette.datastructures.UploadFile):
+        image_bytes = image.file.read()
+        image_array = np.frombuffer(image_bytes, np.uint8)
+        image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+        if image is None:
+            raise ValueError("Failed to load image. Ensure the file is a valid image format.")
+
+    if isinstance(image, np.ndarray):
+        if image.shape[1] >= 1280:
+            scale_factor = 1280 / image.shape[1]
+            new_width = 1280
+            new_height = int(image.shape[0] * scale_factor)
+            return cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
+        return image
+    else:
+        raise TypeError("Input must be either a NumPy array or a file-like object.")

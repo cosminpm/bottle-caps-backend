@@ -7,7 +7,7 @@ from numpy import ndarray
 from app.services.detect.manager import detect_caps
 from app.services.identify.image_vectorizer import ImageVectorizer
 from app.services.pinecone_container import PineconeContainer
-from app.shared.utils import apply_mask, img_to_numpy
+from app.shared.utils import apply_mask, img_to_numpy, resize_image_width
 
 PROJECT_PATH = Path.cwd()
 
@@ -47,6 +47,7 @@ def post_detect_and_identify(file_contents: bytes, user_id: str) -> dict:
 
     """
     image = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
+    image = resize_image_width(image)
     image = img_to_numpy(image)
     cropped_images = detect_caps(image)
     caps_identified = [

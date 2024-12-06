@@ -1,5 +1,6 @@
 from typing import Any
 
+import uvicorn
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pyinstrument import Profiler
@@ -55,3 +56,7 @@ if settings.profiling_time:
 def health_check(request: Request):
     """Healthcheck."""
     return status.HTTP_200_OK
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8080)
