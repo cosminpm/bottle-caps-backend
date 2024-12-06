@@ -37,6 +37,7 @@ docker-run:
 
 # Remove all docker containers
 docker-clean:
+	@docker rm -v -f $(docker ps -qa)
 	@docker system prune -a --volumes
 
 
