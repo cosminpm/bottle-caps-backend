@@ -12,7 +12,8 @@ La aplicación recopila y almacena los siguientes datos:
 ## Proceso de Eliminación de Datos
 
 Para eliminar tu cuenta y todos los datos asociados, debes enviar una solicitud por correo electrónico. A continuación, se describe el proceso:
-> [!WARNING] La direccón de correo debe ser la misma que la cuenta en la que se creó.
+>[!WARNING] 
+    La direccón de correo debe ser la misma que la cuenta en la que se creó.
 1. **Enviar un correo electrónico**
    - Dirección: [cosminmarian.paduraru@gmail.com](mailto:cosminmarian.paduraru@gmail.com)
    - Asunto: "Solicitud de eliminación de cuenta y datos"
@@ -55,7 +56,8 @@ The application collects and stores the following data:
 ## Data Deletion Process
 
 To delete your account and all associated data, you must send a request via email. The process is as follows:
-> [!WARNING] The email address must be the same as the account where it was created.
+> [!WARNING] 
+   The email address must be the same as the account where it was created.
 1. **Send an Email**
    - Email address: [cosminmarian.paduraru@gmail.com](mailto:cosminmarian.paduraru@gmail.com)
    - Subject: "Request for Account and Data Deletion"
