@@ -10,7 +10,7 @@ from app.services.identify.manager import identify_cap, post_detect_and_identify
 from app.services.limiter import request_limiter
 from app.shared.utils import resize_image_width
 
-identify_router: APIRouter = APIRouter(dependencies=[Depends(validate_api_key)])
+identify_router: APIRouter = APIRouter(dependencies=[Depends(validate_api_key)], tags=["Identify"])
 
 
 @identify_router.post("/identify")

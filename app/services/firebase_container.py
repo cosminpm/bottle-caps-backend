@@ -5,7 +5,7 @@ import cv2
 import firebase_admin
 import numpy as np
 import starlette.status
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException
 from firebase_admin import credentials, storage
 
 from app.config import Settings
@@ -30,11 +30,11 @@ class FirebaseContainer:
         self.bucket = storage.bucket()
 
     def add_image_to_container(self, image: np.ndarray, name: str, user_id: str) -> str:
-        success, image_encoded = cv2.imencode('.png', image)
+        success, image_encoded = cv2.imencode(".png", image)
         if not success:
             raise HTTPException(
                 status_code=starlette.status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to encode image."
+                detail="Failed to encode image.",
             )
 
         image_bytes = io.BytesIO(image_encoded.tobytes())
@@ -47,7 +47,7 @@ class FirebaseContainer:
                 status_code=starlette.status.HTTP_409_CONFLICT, detail="Image already exists."
             )
 
-        blob.upload_from_file(image_bytes, content_type='image/png')
+        blob.upload_from_file(image_bytes, content_type="image/png")
         blob.make_public()
 
         return blob.public_url

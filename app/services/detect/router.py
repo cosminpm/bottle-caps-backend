@@ -9,7 +9,7 @@ from app.services.detect.manager import detect_caps
 from app.services.limiter import request_limiter
 from app.shared.utils import img_to_numpy
 
-detect_router: APIRouter = APIRouter(dependencies=[Depends(validate_api_key)])
+detect_router: APIRouter = APIRouter(dependencies=[Depends(validate_api_key)], tags=["Detect"])
 
 
 @detect_router.post("/detect")
