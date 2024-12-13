@@ -1,4 +1,6 @@
+from fastapi import HTTPException
 from pinecone import Pinecone
+from starlette import status
 
 from app.config import Settings
 
@@ -6,8 +8,14 @@ TOP_K = 9
 
 settings = Settings()
 
+VECTOR_SIZE: int = 576
+EMPTY_VECTOR: list[float] = VECTOR_SIZE * [0.1]
+
 
 class PineconeContainer:
+    # The updates from Pinecone take a little bit to reflect,
+    # so if you upload and then instantly remove, it will probably not work.
+
     _instance = None
 
     def __new__(cls):
@@ -50,6 +58,24 @@ class PineconeContainer:
 
     def upsert_multiple_pinecone(self, vectors):
         self.index.upsert(vectors=vectors, namespace="bottle-caps")
+
+    def remove_vector(self, name: str, user_id: str) -> None:
+        res = self.index.query(
+            filter={"name": name, "user_id": user_id},
+            top_k=1,
+            vector=EMPTY_VECTOR,
+            include_metadata=True,
+            namespace="bottle-caps",
+        )
+        if len(res["matches"]) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Image does not exist."
+            )
+        vector_obj = res["matches"][0]
+        self.index.delete(
+            ids=[vector_obj["id"]],
+            namespace="bottle-caps",
+        )
 
     @staticmethod
     def parse_result_query(result_query):

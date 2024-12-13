@@ -44,3 +44,21 @@ async def save_image(
         vector_id=str(uuid.uuid4()), values=vector, metadata={"user_id": user_id, "name": file_name}
     )
     return upload_url
+
+
+def remove_image(
+    name: str,
+    user_id: str,
+) -> None:
+    """Delete an image.
+
+    Args:
+    ----
+        name (str): The name of the image
+        user_id (str): The id of the user
+
+    """
+    pinecone_container: PineconeContainer = PineconeContainer()
+    firebase_container: FirebaseContainer = FirebaseContainer()
+    firebase_container.remove_image(name=name, user_id=user_id)
+    pinecone_container.remove_vector(name=name, user_id=user_id)

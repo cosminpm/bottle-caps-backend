@@ -4,12 +4,12 @@ from starlette.requests import Request
 from app.config import LIMIT_PERIOD
 from app.services.auth import validate_api_key
 from app.services.limiter import request_limiter
-from app.services.saver.manager import save_image
+from app.services.saver.manager import remove_image, save_image
 
-saver_router: APIRouter = APIRouter(dependencies=[Depends(validate_api_key)])
+saver_router: APIRouter = APIRouter(dependencies=[Depends(validate_api_key)], tags=["Saver"])
 
 
-@saver_router.post("/saver", tags=["Saver"])
+@saver_router.post("/saver")
 @request_limiter.limit(LIMIT_PERIOD)
 async def post_save_image(
     file: UploadFile,
@@ -34,3 +34,22 @@ async def post_save_image(
 
     """
     return await save_image(file, name, user_id, vector)
+
+
+@saver_router.delete("/delete")
+@request_limiter.limit(LIMIT_PERIOD)
+async def delete_image(
+    name: str,
+    user_id: str,
+    request: Request,
+) -> None:
+    """Delete an image.
+
+    Args:
+    ----
+        name (str): The name of the image
+        user_id (str): The id of the user
+        request (Request): Needed for the limiter
+
+    """
+    remove_image(name, user_id)

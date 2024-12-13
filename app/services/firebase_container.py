@@ -39,7 +39,7 @@ class FirebaseContainer:
 
         image_bytes = io.BytesIO(image_encoded.tobytes())
 
-        blob_path = f"users/{user_id}/collection/{name}"
+        blob_path = self.build_blob_path(user_id, name)
         blob = self.bucket.blob(blob_path)
 
         if blob.exists():
@@ -52,6 +52,17 @@ class FirebaseContainer:
 
         return blob.public_url
 
+    def remove_image(self, name: str, user_id: str) -> bool:
+        """Remove an image from Firebase."""
+        blob_path = self.build_blob_path(user_id, name)
+        blob = self.bucket.blob(blob_path)
+        if not blob.exists():
+            raise HTTPException(
+                status_code=starlette.status.HTTP_404_NOT_FOUND, detail="Image does not exist."
+            )
+        blob.delete()
+        return True
+
     @staticmethod
     def get_firebase_credentials() -> dict:
         """Parse firebase_credentials JSON string to a dictionary."""
@@ -59,3 +70,7 @@ class FirebaseContainer:
             return json.loads(settings.firebase_config_file)
         except json.JSONDecodeError as e:
             raise ValueError("Invalid JSON for firebase_credentials") from e
+
+    @staticmethod
+    def build_blob_path(user_id: str, name: str) -> str:
+        return f"users/{user_id}/collection/{name}"

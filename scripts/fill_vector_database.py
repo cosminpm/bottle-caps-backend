@@ -25,7 +25,7 @@ async def fill_vector_database() -> None:
     pinecone_container = PineconeContainer()
     firebase_container = FirebaseContainer()
 
-    pinecone_container.empty_index()
+    # pinecone_container.empty_index() noqa: ERA001
     root_dir = str(Path("database") / "caps")
     folders = os.listdir(root_dir)
     img_vectorizer = ImageVectorizer()
