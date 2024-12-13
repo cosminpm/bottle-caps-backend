@@ -15,7 +15,7 @@ Para eliminar tu cuenta y todos los datos asociados, debes enviar una solicitud 
 >[!WARNING] 
     La direccón de correo debe ser la misma que la cuenta en la que se creó.
 1. **Enviar un correo electrónico**
-   - Dirección: [cosminmarian.paduraru@gmail.com](mailto:cosminmarian.paduraru@gmail.com)
+   - Dirección: [support@cap2go.com](mailto:support@cap2go.com)
    - Asunto: "Solicitud de eliminación de cuenta y datos"
    - Contenido sugerido del correo:
      ```
@@ -59,7 +59,7 @@ To delete your account and all associated data, you must send a request via emai
 > [!WARNING] 
    The email address must be the same as the account where it was created.
 1. **Send an Email**
-   - Email address: [cosminmarian.paduraru@gmail.com](mailto:cosminmarian.paduraru@gmail.com)
+   - Email address: [support@cap2go.com](mailto:support@cap2go.com)
    - Subject: "Request for Account and Data Deletion"
    - Suggested email content:
      ```
