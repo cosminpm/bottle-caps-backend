@@ -45,7 +45,15 @@ async def post_save_images(
     user_id: str,
     request: Request,
 ) -> None:
-    """Save multiple images."""
+    """Save multiple images.
+
+    Args:
+    ----
+        files (list[UploadFile]): The files you want to update.
+        user_id (str): The user id that is uploading the files.
+        request (Request): Needed for the limiter
+
+    """
     tasks = []
 
     for file in files:
