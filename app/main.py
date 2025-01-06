@@ -1,5 +1,6 @@
 from typing import Any
 
+import sentry_sdk
 import uvicorn
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,6 +15,17 @@ from app.services.identify.router import identify_router
 from app.services.limiter import request_limiter
 from app.services.saver.router import saver_router
 
+settings = Settings()
+
+sentry_sdk.init(
+    dsn=settings.sentry_dsn,
+    traces_sample_rate=1.0,
+    _experiments={
+        "continuous_profiling_auto_start": True,
+    },
+)
+
+
 app = FastAPI()
 
 # Add routers
@@ -21,7 +33,6 @@ app.include_router(detect_router)
 app.include_router(identify_router)
 app.include_router(saver_router)
 
-settings = Settings()
 
 origins = [
     "*",

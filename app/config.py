@@ -22,3 +22,5 @@ class Settings(BaseSettings):
     torch_home: str = "./model"
 
     api_key: str = "dumb_key"
+
+    sentry_dsn: str = "dumb_dsn"

@@ -26,6 +26,9 @@ bottle-caps-firebase.json
 visual/result/*
 visual/animations/*
 
+# Script analyze
+temporal/analyze.py
+
 # Test DB
 database/*
 
@@ -34,3 +37,6 @@ database/*
 
 # certs
 *.pem
+
+# temporal
+temporal/*

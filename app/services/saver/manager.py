@@ -6,7 +6,7 @@ from fastapi import UploadFile
 from app.services.firebase_container import FirebaseContainer
 from app.services.identify.image_vectorizer import ImageVectorizer
 from app.services.pinecone_container import PineconeContainer
-from app.shared.utils import resize_image_width
+from app.shared.utils import resize_image_max_size
 
 if TYPE_CHECKING:
     import numpy as np
@@ -38,7 +38,7 @@ async def save_image(
     firebase_container: FirebaseContainer = FirebaseContainer()
     file_name: str = f"{name}.jpg"
 
-    image: np.ndarray = resize_image_width(file)
+    image: np.ndarray = resize_image_max_size(file)
     upload_url: str = firebase_container.add_image_to_container(image, file_name, user_id)
     pinecone_container.upsert_into_pinecone(
         vector_id=str(uuid.uuid4()), values=vector, metadata={"user_id": user_id, "name": file_name}

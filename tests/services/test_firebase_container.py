@@ -7,7 +7,7 @@ from fastapi import HTTPException, UploadFile
 from starlette import status
 
 from app.services.firebase_container import FirebaseContainer
-from app.shared.utils import resize_image_width, upload_file
+from app.shared.utils import resize_image_max_size, upload_file
 
 if TYPE_CHECKING:
     import numpy as np
@@ -25,7 +25,7 @@ class TestFirebaseContainer:
         file_path: Path = Path("tests/services/test_image.jpg")
         file: UploadFile = await upload_file(file_path)
         test_image_name: str = "TEST_IMAGE"
-        image: np.ndarray = resize_image_width(file)
+        image: np.ndarray = resize_image_max_size(file)
         self.firebase_container.add_image_to_container(
             image=image, user_id=TEST_USER, name=test_image_name
         )

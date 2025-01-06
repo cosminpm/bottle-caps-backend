@@ -8,7 +8,6 @@ from loguru import logger
 
 load_dotenv()
 
-
 from app.services.firebase_container import FirebaseContainer
 from app.services.identify.image_vectorizer import ImageVectorizer
 from app.services.pinecone_container import PineconeContainer

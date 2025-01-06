@@ -8,7 +8,7 @@ from app.config import LIMIT_PERIOD
 from app.services.auth import validate_api_key
 from app.services.identify.manager import identify_cap, post_detect_and_identify
 from app.services.limiter import request_limiter
-from app.shared.utils import resize_image_width
+from app.shared.utils import resize_image_max_size
 
 identify_router: APIRouter = APIRouter(dependencies=[Depends(validate_api_key)], tags=["Identify"])
 
@@ -30,7 +30,7 @@ async def identify(file: UploadFile, user_id: str, request: Request) -> list[dic
 
     """
     image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
-    image = resize_image_width(image)
+    image = resize_image_max_size(image)
     return identify_cap(cap=np.array(image), user_id=user_id)
 
 

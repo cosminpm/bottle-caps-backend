@@ -1,32 +1,17 @@
-import os
 from io import BytesIO
 from pathlib import Path
 
 import aiofiles
 import cv2
 import numpy as np
-import starlette.datastructures
 from fastapi import UploadFile
 
 SIFT = cv2.SIFT_create()
-IMAGE_WIDTH: int = 1280
+MAX_SIZE: int = 256
 
 
 def _get_name_from_path(path: str) -> str:
     return path.split("\\")[-1]
-
-
-def _resize_img_pix_with_name(cap_path, path_output, pix):
-    cap_name = _get_name_from_path(cap_path)
-    lst_name_cap = cap_name.split(".")
-    cap_name = lst_name_cap[0] + f"_{pix!s}" + "." + lst_name_cap[-1]
-    return _resize_image_and_save(
-        path_to_image=cap_path,
-        width=pix,
-        height=pix,
-        where_save=path_output,
-        name_output=cap_name,
-    )
 
 
 def read_img_from_path_with_mask(img_path: str) -> np.ndarray:
@@ -97,30 +82,6 @@ def img_to_numpy(img) -> np.ndarray:
     return cv2.cvtColor(img, 1)
 
 
-def _resize_image_and_save(path_to_image, width, height, where_save, name_output) -> str:
-    src = read_img_from_path(path_to_image)
-    resized = cv2.resize(src, (width, height))
-    output = str(Path(where_save) / name_output)
-
-    cv2.imwrite(output, resized)
-    return output
-
-
-def resize_all_images(path: str, output: str, size: int) -> None:
-    """Resize a list of images.
-
-    Args:
-    ----
-        path: Folder of the image to resize
-        output: Result folder of the resized images
-        size: Size of each image
-
-    """
-    files = os.listdir(path)
-    for file in files:
-        _resize_img_pix_with_name(str(Path(path) / file), output, size)
-
-
 def rgb_to_bgr(r: int, g: int, b: int) -> tuple:
     """Reorder RGB image to BGR image.
 
@@ -155,23 +116,24 @@ async def upload_file(path: Path) -> UploadFile:
         return UploadFile(filename=str(path), file=BytesIO(file_contents))
 
 
-def resize_image_width(image: np.ndarray | UploadFile) -> np.ndarray:
-    """Resize the image so the width is less than 1280.
+def resize_image_max_size(image: np.ndarray | UploadFile) -> np.ndarray:
+    """Resize the image so its maximum dimension (width or height) is less than or equal to 512.
 
     Can accept both np.ndarray and uploaded image files.
     """
-    if isinstance(image, starlette.datastructures.UploadFile):
+    if isinstance(image, UploadFile):
         image_bytes = image.file.read()
         image_array = np.frombuffer(image_bytes, np.uint8)
         image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
         if image is None:
             raise ValueError("Failed to load image. Ensure the file is a valid image format.")
 
-    if isinstance(image, np.ndarray):
-        if image.shape[1] >= IMAGE_WIDTH:
-            scale_factor = IMAGE_WIDTH / image.shape[1]
-            new_width = IMAGE_WIDTH
-            new_height = int(image.shape[0] * scale_factor)
-            return cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
-        return image
-    raise TypeError("Input must be either a NumPy array or a file-like object.")
+    height, width = image.shape[:2]
+    max_dimension = max(height, width)
+
+    if max_dimension > MAX_SIZE:
+        scale_factor = MAX_SIZE / max_dimension
+        new_width = int(width * scale_factor)
+        new_height = int(height * scale_factor)
+        return cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
+    return image
