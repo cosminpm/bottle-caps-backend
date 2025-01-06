@@ -4,6 +4,7 @@ from pathlib import Path
 import aiofiles
 import cv2
 import numpy as np
+import starlette.datastructures
 from fastapi import UploadFile
 
 SIFT = cv2.SIFT_create()
@@ -121,7 +122,7 @@ def resize_image_max_size(image: np.ndarray | UploadFile) -> np.ndarray:
 
     Can accept both np.ndarray and uploaded image files.
     """
-    if isinstance(image, UploadFile):
+    if isinstance(image, UploadFile) or isinstance(image, starlette.datastructures.UploadFile):
         image_bytes = image.file.read()
         image_array = np.frombuffer(image_bytes, np.uint8)
         image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)

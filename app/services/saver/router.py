@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import APIRouter, Depends, UploadFile
 from starlette.requests import Request
 
@@ -34,6 +36,22 @@ async def post_save_image(
 
     """
     return await save_image(file, name, user_id, vector)
+
+
+@saver_router.post("/saver/bulk")
+@request_limiter.limit(LIMIT_PERIOD)
+async def post_save_images(
+    files: list[UploadFile],
+    user_id: str,
+    request: Request,
+) -> None:
+    tasks = []
+
+    for file in files:
+        name = file.filename
+        task = save_image(file, name, user_id)
+        tasks.append(task)
+    await asyncio.gather(*tasks)
 
 
 @saver_router.delete("/delete")
