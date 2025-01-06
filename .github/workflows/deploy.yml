@@ -18,6 +18,10 @@ jobs:
         DEPLOY_SERVER_SECRET: ${{ secrets.DEPLOY_SERVER_SECRET }}
 
       run: |
+        # Echo the secret (it will be redacted in the logs)
+        echo "DEPLOY_SERVER_SECRET is $DEPLOY_SERVER_SECRET"
+        
+        # SSH to the server and deploy
         sshpass -p "$DEPLOY_SERVER_SECRET" ssh -o StrictHostKeyChecking=no $DEPLOY_SERVER_USER@$DEPLOY_SERVER_HOST << EOF
           cd app/bottle-caps-backend/
 
