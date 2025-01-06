@@ -11,6 +11,23 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
+    - name: Check if Secrets are Set
+      run: |
+        if [ -z "${{ secrets.DEPLOY_SERVER_SECRET }}" ]; then
+          echo "DEPLOY_SERVER_SECRET is not set!"
+        else
+          echo "DEPLOY_SERVER_SECRET is set."
+        fi
+        if [ -z "${{ secrets.DEPLOY_SERVER_USER }}" ]; then
+          echo "DEPLOY_SERVER_USER is not set!"
+        else
+          echo "DEPLOY_SERVER_USER is set."
+        fi
+        if [ -z "${{ secrets.DEPLOY_SERVER_HOST }}" ]; then
+          echo "DEPLOY_SERVER_HOST is not set!"
+        else
+          echo "DEPLOY_SERVER_HOST is set."
+        fi
     - name: Deploy to Droplet
       env:
         DEPLOY_SERVER_USER: ${{ secrets.DEPLOY_SERVER_USER }}
