@@ -20,7 +20,7 @@ jobs:
 
       run: |
         sshpass -p "$DEPLOY_SERVER_SECRET" ssh -o StrictHostKeyChecking=no $DEPLOY_SERVER_USER@$DEPLOY_SERVER_HOST << EOF
-          export TMPDIR='/var/tmp'
+          export TMPDIR='/var/tmp' 
           cd app/bottle-caps-backend/
           git pull
           source .venv/bin/activate
