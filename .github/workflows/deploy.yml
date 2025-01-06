@@ -12,28 +12,15 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Deploy to Droplet
+    - name: Deploy Backend
       env:
         DEPLOY_SERVER_USER: ${{ secrets.DEPLOY_SERVER_USER }}
         DEPLOY_SERVER_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
         DEPLOY_SERVER_SECRET: ${{ secrets.DEPLOY_SERVER_SECRET }}
 
       run: |
-        
-        # SSH to the server and deploy
         sshpass -p "$DEPLOY_SERVER_SECRET" ssh -o StrictHostKeyChecking=no $DEPLOY_SERVER_USER@$DEPLOY_SERVER_HOST << EOF
           cd app/bottle-caps-backend/
-          
-          yes | docker system prune -a || true
-          yes | docker stop $(docker ps -q) || true
-          yes | docker rm $(docker ps -aq) || true
-          yes | docker image prune -af || true
-          yes | docker volume prune -f || true
-          docker rm bottle-caps-backend-container
-
           git pull
-  
-          docker build -t bottle-caps-backend-container:latest .
-
-          docker run -d --name bottle-caps-backend-container -p 8080:8080 bottle-caps-backend-container:latest
+          docker-compose up --build -d
         EOF
