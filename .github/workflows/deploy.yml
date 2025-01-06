@@ -24,11 +24,11 @@ jobs:
         sshpass -p "$DEPLOY_SERVER_SECRET" ssh -o StrictHostKeyChecking=no $DEPLOY_SERVER_USER@$DEPLOY_SERVER_HOST << EOF
           cd app/bottle-caps-backend/
           
-          docker system prune -a
-          docker stop $(docker ps -q)
-          docker rm $(docker ps -aq)
-          docker image prune -af
-          docker volume prune -f
+          docker system prune -a || true
+          docker stop $(docker ps -q) || true
+          docker rm $(docker ps -aq) || true
+          docker image prune -af || true
+          docker volume prune -f || true
 
           git pull
 
