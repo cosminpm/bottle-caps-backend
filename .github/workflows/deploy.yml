@@ -23,7 +23,5 @@ jobs:
           export TMPDIR='/var/tmp' 
           cd app/bottle-caps-backend/
           git pull
-          source .venv/bin/activate
-          pip install -r  requirements.txt --no-cache-dir
-          make run
+          docker compose up --build -d
         EOF
