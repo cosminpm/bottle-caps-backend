@@ -29,9 +29,10 @@ jobs:
           yes | docker rm $(docker ps -aq) || true
           yes | docker image prune -af || true
           yes | docker volume prune -f || true
+          docker rm bottle-caps-backend-container
 
           git pull
-
+  
           docker build -t bottle-caps-backend-container:latest .
 
           docker run -d --name bottle-caps-backend-container -p 8080:8080 bottle-caps-backend-container:latest
