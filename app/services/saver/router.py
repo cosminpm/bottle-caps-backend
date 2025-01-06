@@ -45,6 +45,7 @@ async def post_save_images(
     user_id: str,
     request: Request,
 ) -> None:
+    """Save multiple images."""
     tasks = []
 
     for file in files:

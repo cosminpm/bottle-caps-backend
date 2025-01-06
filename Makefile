@@ -1,9 +1,12 @@
 # Define the FastAPI app module and command
-UVICORN_COMMAND := uvicorn app.main:app --use-colors
+UVICORN_COMMAND :=
 
-# Run the FastAPI app using uvicorn
+# Run the FastAPI app using uvicorn locally
+run-local:
+	@uvicorn app.main:app --use-colors
+
 run:
-	@$(UVICORN_COMMAND)
+	@uvicorn app.main:app --use-colors --host 0.0.0.0 --port 8080
 
 generate:
 	@python -m scripts.generate_model
@@ -26,19 +29,6 @@ format:
 	@ruff format .
 	@ruff check . --fix
 	@mypy --config-file "pyproject.toml"
-
-# Build the docker image
-docker-build:
-	@docker build -t bottle_caps_backend .
-
-# Run the docker image
-docker-run:
-	@docker run -d -p 8080:8080 bottle_caps_backend
-
-# Remove all docker containers
-docker-clean:
-	@docker rm -v -f $(docker ps -qa)
-	@docker system prune -a --volumes
 
 
 # Update the env files

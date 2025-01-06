@@ -122,7 +122,7 @@ def resize_image_max_size(image: np.ndarray | UploadFile) -> np.ndarray:
 
     Can accept both np.ndarray and uploaded image files.
     """
-    if isinstance(image, UploadFile) or isinstance(image, starlette.datastructures.UploadFile):
+    if isinstance(image, (UploadFile | starlette.datastructures.UploadFile)):
         image_bytes = image.file.read()
         image_array = np.frombuffer(image_bytes, np.uint8)
         image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)

@@ -20,7 +20,10 @@ jobs:
 
       run: |
         sshpass -p "$DEPLOY_SERVER_SECRET" ssh -o StrictHostKeyChecking=no $DEPLOY_SERVER_USER@$DEPLOY_SERVER_HOST << EOF
+          export TMPDIR='/var/tmp'
           cd app/bottle-caps-backend/
           git pull
-          docker-compose up --build -d
+          source .venv/bin/activate
+          pip install -r  requirements.txt --no-cache-dir
+          make run
         EOF
