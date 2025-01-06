@@ -1,4 +1,4 @@
-name: Deploy Backend to Droplet
+name: Deploy Backend
 
 on:
   workflow_dispatch:
@@ -12,23 +12,6 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Check if Secrets are Set
-      run: |
-        if [ -z "${{ secrets.DEPLOY_SERVER_SECRET }}" ]; then
-          echo "DEPLOY_SERVER_SECRET is not set!"
-        else
-          echo "DEPLOY_SERVER_SECRET is set."
-        fi
-        if [ -z "${{ secrets.DEPLOY_SERVER_USER }}" ]; then
-          echo "DEPLOY_SERVER_USER is not set!"
-        else
-          echo "DEPLOY_SERVER_USER is set."
-        fi
-        if [ -z "${{ secrets.DEPLOY_SERVER_HOST }}" ]; then
-          echo "DEPLOY_SERVER_HOST is not set!"
-        else
-          echo "DEPLOY_SERVER_HOST is set."
-        fi
     - name: Deploy to Droplet
       env:
         DEPLOY_SERVER_USER: ${{ secrets.DEPLOY_SERVER_USER }}
@@ -36,13 +19,12 @@ jobs:
         DEPLOY_SERVER_SECRET: ${{ secrets.DEPLOY_SERVER_SECRET }}
 
       run: |
-        # Echo the secret (it will be redacted in the logs)
-        echo "DEPLOY_SERVER_SECRET is $DEPLOY_SERVER_SECRET"
         
         # SSH to the server and deploy
         sshpass -p "$DEPLOY_SERVER_SECRET" ssh -o StrictHostKeyChecking=no $DEPLOY_SERVER_USER@$DEPLOY_SERVER_HOST << EOF
           cd app/bottle-caps-backend/
-
+          
+          docker system prune -a
           docker stop $(docker ps -q)
           docker rm $(docker ps -aq)
           docker image prune -af
