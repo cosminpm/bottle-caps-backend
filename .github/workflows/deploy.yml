@@ -1,0 +1,34 @@
+name: Deploy Backend to Droplet
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Deploy to Droplet
+      env:
+        DEPLOY_SERVER_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+        DEPLOY_SERVER_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+        DEPLOY_SERVER_SECRET: ${{ secrets.DEPLOY_SERVER_SECRET }}
+
+      run: |
+        sshpass -p "$DEPLOY_SERVER_SECRET" ssh -o StrictHostKeyChecking=no $DEPLOY_SERVER_USER@$DEPLOY_SERVER_HOST << EOF
+          cd app/bottle-caps-backend/
+
+          docker stop $(docker ps -q)
+          docker rm $(docker ps -aq)
+          docker image prune -af
+          docker volume prune -f
+
+          git pull
+
+          docker build -t bottle-caps-backend-container:latest .
+
+          docker run -d --name bottle-caps-backend-container -p 8080:8080 bottle-caps-backend-container:latest
+        EOF
