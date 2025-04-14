@@ -23,5 +23,6 @@ jobs:
           export TMPDIR='/var/tmp' 
           cd app/bottle-caps-backend/
           git pull
+          docker system prune -af --volumes
           docker compose up --build -d
         EOF
