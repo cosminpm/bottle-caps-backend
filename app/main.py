@@ -62,7 +62,7 @@ if settings.profiling_time:
         return response
 
 
-@app.get("/health", dependencies=[Depends(validate_api_key)])
+@app.get("/health")
 @request_limiter.limit(LIMIT_PERIOD)
 def health_check(request: Request):
     """Healthcheck."""
