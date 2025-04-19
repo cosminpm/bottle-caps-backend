@@ -52,9 +52,12 @@ async def post_save_images(
         for processed, event in enumerate(progress):
             await event.wait()
             event.clear()
-            yield f"data: {json.dumps({'processed': processed,
-                                       'total': total_images,
-                                       'percentage': processed / total_images})}\n\n"
+            data = {
+                "processed": processed,
+                "total": total_images,
+                "percentage": processed / total_images,
+            }
+            yield f"data: {json.dumps(data)}\n\n"
 
     progress_events = [asyncio.Event() for _ in files]
 

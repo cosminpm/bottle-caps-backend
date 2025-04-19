@@ -17,6 +17,7 @@ settings = Settings()
 
 if settings.is_sentry:
     import sentry_sdk
+
     sentry_sdk.init(
         dsn=settings.sentry_dsn,
         traces_sample_rate=1.0,
