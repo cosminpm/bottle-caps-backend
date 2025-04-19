@@ -2,14 +2,13 @@ from typing import Any
 
 import sentry_sdk
 import uvicorn
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pyinstrument import Profiler
 from starlette import status
 from starlette.requests import Request
 
 from app.config import LIMIT_PERIOD, Settings
-from app.services.auth import validate_api_key
 from app.services.detect.router import detect_router
 from app.services.identify.router import identify_router
 from app.services.limiter import request_limiter

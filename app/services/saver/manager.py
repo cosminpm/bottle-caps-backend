@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 from typing import TYPE_CHECKING
 
@@ -10,6 +11,33 @@ from app.shared.utils import resize_image_max_size
 
 if TYPE_CHECKING:
     import numpy as np
+
+
+async def save_image_progress(
+    file: UploadFile,
+    name: str,
+    user_id: str,
+    progress_callback: asyncio.Event,
+    vector: list[float] | None = None,
+):
+    """Asynchronously saves an image and triggers a progress callback once completed.
+
+    Args:
+    ----
+        file (UploadFile): The image file to be uploaded.
+        name (str): The name for the image.
+        user_id (str): Unique user identifier.
+        progress_callback (asyncio.Event): Event to signal when the upload is complete.
+        vector (list[float] | None, optional): Optional vector data associated with the image.
+
+    Returns:
+    -------
+        str: URL of the uploaded image.
+
+    """
+    url_upload = await save_image(file=file, name=name, user_id=user_id, vector=vector)
+    progress_callback.set()
+    return url_upload
 
 
 async def save_image(
