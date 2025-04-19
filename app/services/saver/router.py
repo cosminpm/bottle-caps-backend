@@ -1,12 +1,14 @@
 import asyncio
+import json
 
 from fastapi import APIRouter, Depends, UploadFile
 from starlette.requests import Request
+from starlette.responses import StreamingResponse
 
 from app.config import LIMIT_PERIOD
 from app.services.auth import validate_api_key
 from app.services.limiter import request_limiter
-from app.services.saver.manager import remove_image, save_image
+from app.services.saver.manager import remove_image, save_image, save_image_progress
 
 saver_router: APIRouter = APIRouter(dependencies=[Depends(validate_api_key)], tags=["Saver"])
 
@@ -39,28 +41,36 @@ async def post_save_image(
 
 
 @saver_router.post("/saver/bulk")
-@request_limiter.limit(LIMIT_PERIOD)
 async def post_save_images(
     files: list[UploadFile],
     user_id: str,
     request: Request,
-) -> None:
-    """Save multiple images.
+) -> StreamingResponse:
+    """Save multiple images and send progress updates via SSE."""
 
-    Args:
-    ----
-        files (list[UploadFile]): The files you want to update.
-        user_id (str): The user id that is uploading the files.
-        request (Request): Needed for the limiter
+    async def event_generator(progress: list[asyncio.Event], total_images: int) -> str:
+        for processed, event in enumerate(progress):
+            await event.wait()
+            event.clear()
+            yield f"data: {json.dumps({'processed': processed,
+                                       'total': total_images,
+                                       'percentage': processed / total_images})}\n\n"
 
-    """
+    progress_events = [asyncio.Event() for _ in files]
+
     tasks = []
-
-    for file in files:
+    for idx, file in enumerate(files):
         name = file.filename
-        task = save_image(file, name, user_id)
+        task = save_image_progress(
+            file=file, name=name, user_id=user_id, progress_callback=progress_events[idx]
+        )
         tasks.append(task)
+
     await asyncio.gather(*tasks)
+
+    return StreamingResponse(
+        event_generator(progress_events, len(files)), media_type="text/event-stream"
+    )
 
 
 @saver_router.delete("/delete")
