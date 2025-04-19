@@ -8,7 +8,7 @@ from starlette.responses import StreamingResponse
 from app.config import LIMIT_PERIOD
 from app.services.auth import validate_api_key
 from app.services.limiter import request_limiter
-from app.services.saver.manager import remove_image, save_image, save_image_progress
+from app.services.saver.manager import remove_image, save_image
 
 saver_router: APIRouter = APIRouter(dependencies=[Depends(validate_api_key)], tags=["Saver"])
 
@@ -40,6 +40,9 @@ async def post_save_image(
     return await save_image(file, name, user_id, vector)
 
 
+from io import BytesIO
+
+
 @saver_router.post("/saver/bulk")
 async def post_save_images(
     files: list[UploadFile],
@@ -47,33 +50,42 @@ async def post_save_images(
     request: Request,
 ) -> StreamingResponse:
     """Save multiple images and send progress updates via SSE."""
+    total_files = len(files)
+    progress_queue = asyncio.Queue()
+    update_event = asyncio.Event()
 
-    async def event_generator(progress: list[asyncio.Event], total_images: int) -> str:
-        for processed, event in enumerate(progress):
-            await event.wait()
-            event.clear()
-            data = {
-                "processed": processed,
-                "total": total_images,
-                "percentage": processed / total_images,
-            }
-            yield f"data: {json.dumps(data)}\n\n"
+    file_buffers = [{"filename": file.filename, "buffer": await file.read()} for file in files]
 
-    progress_events = [asyncio.Event() for _ in files]
+    async def worker():
+        for idx, file in enumerate(file_buffers):
+            try:
+                fake_upload_file = UploadFile(
+                    filename=file["filename"], file=BytesIO(file["buffer"])
+                )
+                await save_image(fake_upload_file, file["filename"], user_id)
+            finally:
+                await progress_queue.put(
+                    {
+                        "processed": idx + 1,
+                        "total": total_files,
+                        "percentage": (idx + 1) / total_files,
+                    }
+                )
+                update_event.set()
 
-    tasks = []
-    for idx, file in enumerate(files):
-        name = file.filename
-        task = save_image_progress(
-            file=file, name=name, user_id=user_id, progress_callback=progress_events[idx]
-        )
-        tasks.append(task)
+    async def event_generator():
+        processed = 0
+        while processed < total_files:
+            await update_event.wait()
+            while not progress_queue.empty():
+                data = await progress_queue.get()
+                yield f"data: {json.dumps(data)}\n\n"
+                processed = data["processed"]
+            update_event.clear()
 
-    await asyncio.gather(*tasks)
+    asyncio.create_task(worker())  # noqa: RUF006
 
-    return StreamingResponse(
-        event_generator(progress_events, len(files)), media_type="text/event-stream"
-    )
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 @saver_router.delete("/delete")
