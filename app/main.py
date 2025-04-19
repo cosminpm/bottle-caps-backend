@@ -1,6 +1,5 @@
 from typing import Any
 
-import sentry_sdk
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,13 +15,15 @@ from app.services.saver.router import saver_router
 
 settings = Settings()
 
-sentry_sdk.init(
-    dsn=settings.sentry_dsn,
-    traces_sample_rate=1.0,
-    _experiments={
-        "continuous_profiling_auto_start": True,
-    },
-)
+if settings.is_sentry:
+    import sentry_sdk
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        traces_sample_rate=1.0,
+        _experiments={
+            "continuous_profiling_auto_start": True,
+        },
+    )
 
 
 app = FastAPI()
@@ -69,4 +70,4 @@ def health_check(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=8080)

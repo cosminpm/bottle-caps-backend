@@ -24,3 +24,4 @@ class Settings(BaseSettings):
     api_key: str = "dumb_key"
 
     sentry_dsn: str = "dumb_dsn"
+    is_sentry: bool = True
