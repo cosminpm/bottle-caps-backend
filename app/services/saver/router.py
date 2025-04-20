@@ -2,6 +2,7 @@ import asyncio
 import json
 
 from fastapi import APIRouter, Depends, UploadFile
+from loguru import logger
 from starlette.requests import Request
 from starlette.responses import StreamingResponse
 
@@ -37,10 +38,8 @@ async def post_save_image(
         A public string that show us where the bottle cap it is.
 
     """
-    return await save_image(file, name, user_id, vector)
-
-
-from io import BytesIO
+    file_data = await file.read()
+    return await save_image(file_data, name, user_id, vector)
 
 
 @saver_router.post("/saver/bulk")
@@ -50,42 +49,22 @@ async def post_save_images(
     request: Request,
 ) -> StreamingResponse:
     """Save multiple images and send progress updates via SSE."""
-    total_files = len(files)
-    progress_queue = asyncio.Queue()
-    update_event = asyncio.Event()
+    files_data = [(await data.read(), data.filename) for data in files]
+    total_images: int = len(files)
 
-    file_buffers = [{"filename": file.filename, "buffer": await file.read()} for file in files]
-
-    async def worker():
-        for idx, file in enumerate(file_buffers):
+    async def event_stream():
+        tasks = [save_image(file, name, user_id) for file, name in files_data]
+        for index, coro in enumerate(asyncio.as_completed(tasks)):
             try:
-                fake_upload_file = UploadFile(
-                    filename=file["filename"], file=BytesIO(file["buffer"])
-                )
-                await save_image(fake_upload_file, file["filename"], user_id)
-            finally:
-                await progress_queue.put(
-                    {
-                        "processed": idx + 1,
-                        "total": total_files,
-                        "percentage": (idx + 1) / total_files,
-                    }
-                )
-                update_event.set()
-
-    async def event_generator():
-        processed = 0
-        while processed < total_files:
-            await update_event.wait()
-            while not progress_queue.empty():
-                data = await progress_queue.get()
+                await coro
+                data = {"processed": index, "total": total_images}
                 yield f"data: {json.dumps(data)}\n\n"
-                processed = data["processed"]
-            update_event.clear()
+                logger.info(f" Bulk upload succeeded {user_id}: {index}")
 
-    asyncio.create_task(worker())  # noqa: RUF006
+            except Exception as e:  # noqa: BLE001
+                yield f"data:{e!s}\n\n"
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 @saver_router.delete("/delete")

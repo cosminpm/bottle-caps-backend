@@ -117,17 +117,24 @@ async def upload_file(path: Path) -> UploadFile:
         return UploadFile(filename=str(path), file=BytesIO(file_contents))
 
 
-def resize_image_max_size(image: np.ndarray | UploadFile) -> np.ndarray:
+def resize_image_max_size(image: np.ndarray | UploadFile | bytes) -> np.ndarray:
     """Resize the image so its maximum dimension (width or height) is less than or equal to 512.
 
-    Can accept both np.ndarray and uploaded image files.
+    Can accept np.ndarray, uploaded image files, or raw image bytes.
     """
     if isinstance(image, (UploadFile | starlette.datastructures.UploadFile)):
         image_bytes = image.file.read()
-        image_array = np.frombuffer(image_bytes, np.uint8)
-        image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-        if image is None:
-            raise ValueError("Failed to load image. Ensure the file is a valid image format.")
+    elif isinstance(image, bytes):
+        image_bytes = image
+    elif isinstance(image, np.ndarray):
+        return image
+    else:
+        raise TypeError("Unsupported image format. Must be np.ndarray, UploadFile, or bytes.")
+
+    image_array = np.frombuffer(image_bytes, np.uint8)
+    image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+    if image is None:
+        raise TypeError("Failed to load image. Ensure the file is a valid image format.")
 
     height, width = image.shape[:2]
     max_dimension = max(height, width)
@@ -137,4 +144,5 @@ def resize_image_max_size(image: np.ndarray | UploadFile) -> np.ndarray:
         new_width = int(width * scale_factor)
         new_height = int(height * scale_factor)
         return cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
+
     return image

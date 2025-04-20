@@ -7,11 +7,11 @@ LIMIT_PERIOD: str = "15/minute"
 
 
 class Settings(BaseSettings):
-    firebase_config_file: str
-    firebase_bucket: str
+    firebase_config_file: str = ""
+    firebase_bucket: str = ""
 
-    pinecone_api_key: str
-    pinecone_env: str
+    pinecone_api_key: str = ""
+    pinecone_env: str = ""
 
     profiling_time: bool = False
 
@@ -25,3 +25,5 @@ class Settings(BaseSettings):
 
     sentry_dsn: str = "dumb_dsn"
     is_sentry: bool = True
+
+    initialize_model: bool = True

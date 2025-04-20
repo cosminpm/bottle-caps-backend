@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from dotenv import load_dotenv
@@ -26,3 +26,19 @@ async def test_saver_bulk_ok():
 
     fake_request = MagicMock(spec=Request)
     await post_save_images(files=uploaded_files, user_id="test_user", request=fake_request)
+
+
+@pytest.mark.asyncio
+async def test_saver_bulk_mock():
+    """Fake test, to check if the router is
+    working correctly without calling the actual functionality.
+    """  # noqa: D205
+    directory: Path = Path("tests/services/saver/test_multiple_images")
+    paths: list = list(directory.glob("*.jpg"))
+    uploaded_files = [await upload_file(path) for path in paths]
+
+    fake_request = MagicMock(spec=Request)
+
+    with patch("app.services.saver.router.save_image", new_callable=AsyncMock) as mock_save_image:
+        mock_save_image.return_value = None
+        await post_save_images(files=uploaded_files, user_id="test_user", request=fake_request)

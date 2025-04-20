@@ -1,8 +1,6 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from fastapi import UploadFile
-
 from app.services.firebase_container import FirebaseContainer
 from app.services.identify.image_vectorizer import ImageVectorizer
 from app.services.pinecone_container import PineconeContainer
@@ -13,7 +11,7 @@ if TYPE_CHECKING:
 
 
 async def save_image(
-    file: UploadFile,
+    file: bytes,
     name: str,
     user_id: str,
     vector: list[float] | None = None,

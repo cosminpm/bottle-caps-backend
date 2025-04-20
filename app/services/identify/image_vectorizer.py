@@ -1,13 +1,13 @@
-import io
-
 import cv2
 import numpy as np
 import torch
-from fastapi import UploadFile
 from torchvision import transforms
 from torchvision.models import mobilenet_v3_small
 
+from app.config import Settings
 from app.shared.utils import apply_mask
+
+settings = Settings()
 
 
 class ImageVectorizer:
@@ -16,7 +16,10 @@ class ImageVectorizer:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._initialize()
+
+            # Disable initialization to make tests faster
+            if settings.initialize_model:
+                cls._instance._initialize()
         return cls._instance
 
     def _initialize(self):
@@ -34,13 +37,9 @@ class ImageVectorizer:
             ]
         )
 
-    async def image_to_vector(self, cap: UploadFile) -> list:
-        file_data = await cap.read()
-        image = cv2.imdecode(np.frombuffer(file_data, np.uint8), cv2.IMREAD_COLOR)
+    async def image_to_vector(self, file: bytes) -> list:
+        image = cv2.imdecode(np.frombuffer(file, np.uint8), cv2.IMREAD_COLOR)
         img = apply_mask(np.array(image))
-
-        # Reset the file pointer
-        cap.file = io.BytesIO(file_data)
 
         return self.numpy_to_vector(img=img)
 
